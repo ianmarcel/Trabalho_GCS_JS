@@ -1,0 +1,49 @@
+version: "3.7"
+services:
+  postgres:
+    build: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres-gces:/var/lib/postgresql/data
+
+  backend:
+    build: library_back
+    ports:
+      - 8000:8000
+    env_file:
+      - ./library_back/.env
+    depends_on:
+      - postgres
+
+  frontend:
+    build: library_front
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+      - backend
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 8080:8080
+    depends_on:
+      - frontend
+
+  # lint:
+  #   build:
+  #     context: ./path/to/lint
+  #     dockerfile: Dockerfile
+  #   # Configurar os comandos necessários para executar o lint
+  #   #olha no gpt ja me respondeu os comandos
+  #   #sobre os testes(tem no meu bloco de notas,simples)
+  #   command: ["/bin/sh", "-c", "lint_command"]
+  #   depends_on:
+  #     - backend
+  #     - frontend
+
+volumes:
+  postgres-gces:
